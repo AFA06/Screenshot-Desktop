@@ -79,4 +79,29 @@ public class ScreenCapture
         User32.ReleaseDC(handle, hdcSrc);
         return img;
     }
+private static Image CaptureWindowFromDC(IntPtr handle, IntPtr hdcSrc, User32.RECT windowRect){
+        // get the size
+        int width = windowRect.right - windowRect.left;
+        int height = windowRect.bottom - windowRect.top;
+        // create a device context we can copy to
+        IntPtr hdcDest = GDI32.CreateCompatibleDC(hdcSrc);
+        // create a bitmap we can copy it to,
+        // using GetDeviceCaps to get the width/height
+        IntPtr hBitmap = GDI32.CreateCompatibleBitmap(hdcSrc, width, height);
+        // select the bitmap object
+        IntPtr hOld = GDI32.SelectObject(hdcDest, hBitmap);
+        // bitblt over
+        GDI32.BitBlt(hdcDest, 0, 0, width, height, hdcSrc, windowRect.left, windowRect.top, GDI32.SRCCOPY);
+        // restore selection
+        GDI32.SelectObject(hdcDest, hOld);
+        // clean up
+        GDI32.DeleteDC(hdcDest);
+        // get a .NET image object for it
+        Image img = Image.FromHbitmap(hBitmap);
+        // free up the Bitmap object
+        GDI32.DeleteObject(hBitmap);
+        return img;
+    }
+
+
 }
