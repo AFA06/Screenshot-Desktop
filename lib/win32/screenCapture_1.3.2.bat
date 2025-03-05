@@ -196,4 +196,112 @@ public void CaptureActiveWindowToFile(string filename, ImageFormat format)
 
     }
 
+
+     static void printHelp()
+    {
+        //clears the extension from the script name
+        String scriptName = Environment.GetCommandLineArgs()[0];
+        scriptName = scriptName.Substring(0, scriptName.Length);
+        Console.WriteLine(scriptName + " captures the screen or the active window and saves it to a file.");
+        Console.WriteLine("");
+        Console.WriteLine("Usage:");
+        Console.WriteLine(" " + scriptName + " filename  [WindowTitle]");
+        Console.WriteLine("");
+        Console.WriteLine("filename - the file where the screen capture will be saved");
+        Console.WriteLine("     allowed file extensions are - Bmp,Emf,Exif,Gif,Icon,Jpeg,Png,Tiff,Wmf.");
+        Console.WriteLine("WindowTitle - instead of capture whole screen you can point to a window ");
+        Console.WriteLine("     with a title which will put on focus and captuted.");
+        Console.WriteLine("     For WindowTitle you can pass only the first few characters.");
+        Console.WriteLine("     If don't want to change the current active window pass only \"\"");
+        Console.WriteLine("");
+        Console.WriteLine(" " + scriptName + " (/l | /list)");
+        Console.WriteLine("");
+        Console.WriteLine("List the available displays");
+        Console.WriteLine("");
+        Console.WriteLine(" " + scriptName + " filename  (/d | /display) displayName");
+        Console.WriteLine("");
+        Console.WriteLine("filename - as above");
+        Console.WriteLine("displayName - a display name optained from running the script with /list");
+    }
+
+    public static void Main()
+    {
+        parseArguments();
+        ScreenCapture sc = new ScreenCapture();
+        if (!fullscreen && !windowTitle.Equals(""))
+        {
+            try
+            {
+
+                Interaction.AppActivate(windowTitle);
+                Console.WriteLine("setting " + windowTitle + " on focus");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Probably there's no window like " + windowTitle);
+                Console.WriteLine(e.ToString());
+                Environment.Exit(9);
+            }
+
+
+        }
+        try
+        {
+            if (fullscreen)
+            {
+                Console.WriteLine("Taking a capture of the whole screen to " + file);
+                sc.CaptureScreenToFile(file, format);
+            }
+            else
+            {
+                Console.WriteLine("Taking a capture of the active window to " + file);
+                sc.CaptureActiveWindowToFile(file, format);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Check if file path is valid " + file);
+            Console.WriteLine(e.ToString());
+        }
+    }
+
+    /// Helper class containing Gdi32 API functions
+
+    private class GDI32
+    {
+
+        public const int SRCCOPY = 0x00CC0020; // BitBlt dwRop parameter
+        [DllImport("gdi32.dll")]
+        public static extern bool BitBlt(IntPtr hObject, int nXDest, int nYDest,
+          int nWidth, int nHeight, IntPtr hObjectSource,
+          int nXSrc, int nYSrc, int dwRop);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleBitmap(IntPtr hDC, int nWidth,
+          int nHeight);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
+        [DllImport("gdi32.dll")]
+        public static extern bool DeleteDC(IntPtr hDC);
+        [DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
+    }
+
+
+    /// Helper class containing User32 API functions
+
+    public class User32
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+        }
+
 }
+
+
