@@ -155,5 +155,45 @@ public void CaptureActiveWindowToFile(string filename, ImageFormat format)
         formats.Add("tiff", System.Drawing.Imaging.ImageFormat.Tiff);
         formats.Add("wmf", System.Drawing.Imaging.ImageFormat.Wmf);
 
+        String ext = "";
+        if (file.LastIndexOf('.') > -1)
+        {
+            ext = file.ToLower().Substring(file.LastIndexOf('.') + 1, file.Length - file.LastIndexOf('.') - 1);
+        }
+        else
+        {
+            Console.WriteLine("Invalid file name - no extension");
+            Environment.Exit(7);
+        }
+
+        try
+        {
+            format = formats[ext];
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Probably wrong file format:" + ext);
+            Console.WriteLine(e.ToString());
+            Environment.Exit(8);
+        }
+
+        if (arguments.Length <= 2){
+            return;
+        }
+
+        if (arguments[2].ToLower().Equals("/d") || arguments[2].ToLower().Equals("/display")){
+            if (arguments.Length == 2) {
+                Console.WriteLine("Must specify a display if passing /display");
+                Environment.Exit(9);
+            }
+            deviceName = arguments[3];
+        }
+        else if (arguments.Length > 2)
+        {
+            windowTitle = arguments[2];
+            fullscreen = false;
+        }
+
+    }
 
 }
