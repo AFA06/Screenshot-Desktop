@@ -1,0 +1,6 @@
+node_modules
+out.jpg
+*.exe
+*.log
+*.png
+.vscode
