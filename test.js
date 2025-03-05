@@ -30,3 +30,41 @@ function checkDisplays(t, displays) {
     t.truthy(disp.id !== undefined);
   });
 }
+
+test('screenshot each display', t => {
+    if (screenshot.availableDisplays) {
+      return screenshot.availableDisplays().then(displays => {
+        checkDisplays(t, displays);
+  
+        displays.forEach(display => {
+          screenshot(display.id);
+        });
+      });
+    } else {
+      t.pass();
+    }
+  });
+  
+  test('screenshot to a file', t => {
+    t.plan(1);
+    const tmpName = temp.path({ suffix: '.jpg' });
+    return screenshot({ filename: tmpName }).then(() => {
+      t.truthy(existsSync(tmpName));
+      unlinkSync(tmpName);  // Clean up after test
+    });
+  });
+  
+  test('screenshot to a specific folder', t => {
+    t.plan(1);
+    const tmpName = `${screenshotFolder}/screenshot.jpg`;  // Use the correct path
+    console.log('Saving screenshot to:', tmpName);
+  
+    return screenshot({ filename: tmpName }).then(() => {
+      console.log('File exists:', existsSync(tmpName));
+      t.truthy(existsSync(tmpName));  // Check if the screenshot was saved
+      unlinkSync(tmpName);  // Clean up after test
+    }).catch(err => {
+      console.error('Error taking screenshot:', err);
+    });
+  }); 
+  
