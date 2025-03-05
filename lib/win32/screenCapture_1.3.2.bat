@@ -104,4 +104,56 @@ private static Image CaptureWindowFromDC(IntPtr handle, IntPtr hdcSrc, User32.RE
     }
 
 
+public void CaptureActiveWindowToFile(string filename, ImageFormat format)
+    {
+        Image img = CaptureActiveWindow();
+        img.Save(filename, format);
+    }
+
+    public void CaptureScreenToFile(string filename, ImageFormat format)
+    {
+        Image img = CaptureScreen();
+        img.Save(filename, format);
+    }
+
+    static bool fullscreen = true;
+    static String file = "screenshot.bmp";
+    static System.Drawing.Imaging.ImageFormat format = System.Drawing.Imaging.ImageFormat.Bmp;
+    static String windowTitle = "";
+    static List<MonitorInfoWithHandle> _monitorInfos;
+
+    static void parseArguments()
+    {
+        String[] arguments = Environment.GetCommandLineArgs();
+        if (arguments.Length == 1)
+        {
+            printHelp();
+            Environment.Exit(0);
+        }
+        if (arguments[1].ToLower().Equals("/h") || arguments[1].ToLower().Equals("/help"))
+        {
+            printHelp();
+            Environment.Exit(0);
+        }
+        if (arguments[1].ToLower().Equals("/l") || arguments[1].ToLower().Equals("/list"))
+        {
+            PrintMonitorInfo();
+            Environment.Exit(0);
+        }
+
+        file = arguments[1];
+        Dictionary<String, System.Drawing.Imaging.ImageFormat> formats =
+        new Dictionary<String, System.Drawing.Imaging.ImageFormat>();
+
+        formats.Add("bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+        formats.Add("emf", System.Drawing.Imaging.ImageFormat.Emf);
+        formats.Add("exif", System.Drawing.Imaging.ImageFormat.Exif);
+        formats.Add("jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+        formats.Add("jpeg", System.Drawing.Imaging.ImageFormat.Jpeg);
+        formats.Add("gif", System.Drawing.Imaging.ImageFormat.Gif);
+        formats.Add("png", System.Drawing.Imaging.ImageFormat.Png);
+        formats.Add("tiff", System.Drawing.Imaging.ImageFormat.Tiff);
+        formats.Add("wmf", System.Drawing.Imaging.ImageFormat.Wmf);
+
+
 }
