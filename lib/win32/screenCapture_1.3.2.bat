@@ -33,6 +33,8 @@ using System.Drawing.Imaging;
 using System.Collections.Generic;
 using Microsoft.VisualBasic;
 
+
+
 /// Provides functions to capture the entire screen, or a particular window, and save it to a file.
 
 public class ScreenCapture
@@ -64,8 +66,7 @@ public class ScreenCapture
         return CaptureWindow(User32.GetDesktopWindow());
     }
 
-
-/// Creates an Image object containing a screen shot of a specific window
+    /// Creates an Image object containing a screen shot of a specific window
 
     private Image CaptureWindow(IntPtr handle)
     {
@@ -79,7 +80,7 @@ public class ScreenCapture
         User32.ReleaseDC(handle, hdcSrc);
         return img;
     }
-private static Image CaptureWindowFromDC(IntPtr handle, IntPtr hdcSrc, User32.RECT windowRect){
+    private static Image CaptureWindowFromDC(IntPtr handle, IntPtr hdcSrc, User32.RECT windowRect){
         // get the size
         int width = windowRect.right - windowRect.left;
         int height = windowRect.bottom - windowRect.top;
@@ -103,8 +104,7 @@ private static Image CaptureWindowFromDC(IntPtr handle, IntPtr hdcSrc, User32.RE
         return img;
     }
 
-
-public void CaptureActiveWindowToFile(string filename, ImageFormat format)
+    public void CaptureActiveWindowToFile(string filename, ImageFormat format)
     {
         Image img = CaptureActiveWindow();
         img.Save(filename, format);
@@ -155,6 +155,7 @@ public void CaptureActiveWindowToFile(string filename, ImageFormat format)
         formats.Add("tiff", System.Drawing.Imaging.ImageFormat.Tiff);
         formats.Add("wmf", System.Drawing.Imaging.ImageFormat.Wmf);
 
+
         String ext = "";
         if (file.LastIndexOf('.') > -1)
         {
@@ -196,8 +197,7 @@ public void CaptureActiveWindowToFile(string filename, ImageFormat format)
 
     }
 
-
-     static void printHelp()
+    static void printHelp()
     {
         //clears the extension from the script name
         String scriptName = Environment.GetCommandLineArgs()[0];
@@ -302,10 +302,7 @@ public void CaptureActiveWindowToFile(string filename, ImageFormat format)
             public int bottom;
         }
 
-}
-
-
- [DllImport("user32.dll")]
+        [DllImport("user32.dll")]
         public static extern IntPtr GetDC(IntPtr hWnd);
         [DllImport("user32.dll")]
         public static extern IntPtr GetDesktopWindow();
@@ -408,4 +405,4 @@ public void CaptureActiveWindowToFile(string filename, ImageFormat format)
                 mi.DpiScale);
         }
     }
-} 
+}
