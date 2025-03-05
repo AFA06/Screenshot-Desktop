@@ -305,3 +305,107 @@ public void CaptureActiveWindowToFile(string filename, ImageFormat format)
 }
 
 
+ [DllImport("user32.dll")]
+        public static extern IntPtr GetDC(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetDesktopWindow();
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowDC(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDC);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+       [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+       public struct MONITORINFOEX
+       {
+           public uint size;
+           public RECT Monitor;
+           public RECT WorkArea;
+           public uint Flags;
+           [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+           public string DeviceName;
+       }
+
+       [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+       public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFOEX lpmi);
+
+       public delegate bool MonitorEnumDelegate(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData);
+
+       [DllImport("user32.dll")]
+       public static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumDelegate lpfnEnum, IntPtr dwData);
+    }
+
+    public class Shcore
+    {
+       [DllImport("Shcore.dll")]
+       public static extern IntPtr GetDpiForMonitor(IntPtr hMonitor, int dpiType, out uint dpiX, out uint dpiY);
+    }
+
+    private class MonitorInfoWithHandle
+    {
+        public IntPtr MonitorHandle { get; private set; }
+        public User32.MONITORINFOEX MonitorInfo { get; private set; }
+        public float DpiScale { get; private set; }
+        public MonitorInfoWithHandle(IntPtr monitorHandle, User32.MONITORINFOEX monitorInfo, float dpiScale)
+        {
+            MonitorHandle = monitorHandle;
+            MonitorInfo = monitorInfo;
+            DpiScale = dpiScale;
+        }
+    }
+    private static bool MonitorEnum(IntPtr hMonitor, IntPtr hdcMonitor, ref User32.RECT lprcMonitor, IntPtr dwData)
+    {
+        var mi = new User32.MONITORINFOEX();
+        mi.size = (uint)Marshal.SizeOf(mi);
+        User32.GetMonitorInfo(hMonitor, ref mi);
+        uint dpiX, dpiY;
+        Shcore.GetDpiForMonitor(hMonitor, 0, out dpiX, out dpiY);
+        float dpiScale = ((float) dpiX) / 96;
+
+        _monitorInfos.Add(new MonitorInfoWithHandle(hMonitor, mi, dpiScale));
+        return true;
+    }
+    private static bool CaptureMonitorEnum(IntPtr hMonitor, IntPtr hdcMonitor, ref User32.RECT lprcMonitor, IntPtr dwData)
+    {
+        var mi = new User32.MONITORINFOEX();
+        mi.size = (uint)Marshal.SizeOf(mi);
+        User32.GetMonitorInfo(hMonitor, ref mi);
+        if (mi.DeviceName.ToLower().Equals(deviceName.ToLower())) {
+            Console.WriteLine("hMonitor is {0}, hdcMonitor is {1}", hMonitor, hdcMonitor);
+            capturedImage = CaptureWindowFromDC(hMonitor, hdcMonitor, lprcMonitor);
+        }
+        return true;
+    }
+    public static void CaptureSpecificWindow()
+    {
+        IntPtr hdc = User32.GetDC(IntPtr.Zero);
+        User32.EnumDisplayMonitors(hdc, IntPtr.Zero, CaptureMonitorEnum, IntPtr.Zero);
+        User32.ReleaseDC(IntPtr.Zero, hdc);
+    }
+    private static List<MonitorInfoWithHandle> GetMonitors()
+    {
+        _monitorInfos = new List<MonitorInfoWithHandle>();
+
+        User32.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, MonitorEnum, IntPtr.Zero);
+
+        return _monitorInfos;
+    }
+
+    public static void PrintMonitorInfo()
+    {
+        var mis = GetMonitors();
+        foreach (var mi in mis)
+        {
+            Console.WriteLine("{0};{1};{2};{3};{4};{5}",
+                mi.MonitorInfo.DeviceName,
+                mi.MonitorInfo.Monitor.top,
+                mi.MonitorInfo.Monitor.right,
+                mi.MonitorInfo.Monitor.bottom,
+                mi.MonitorInfo.Monitor.left,
+                mi.DpiScale);
+        }
+    }
+} 
