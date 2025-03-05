@@ -33,3 +33,34 @@ using System.Drawing.Imaging;
 using System.Collections.Generic;
 using Microsoft.VisualBasic;
 
+/// Provides functions to capture the entire screen, or a particular window, and save it to a file.
+
+public class ScreenCapture
+{
+
+    static String deviceName = "";
+    static Image capturedImage = null;
+
+    /// Creates an Image object containing a screen shot the active window
+
+    public Image CaptureActiveWindow()
+    {
+        return CaptureWindow(User32.GetForegroundWindow());
+    }
+
+    /// Creates an Image object containing a screen shot of the entire desktop
+
+    public Image CaptureScreen()
+    {
+        if (!deviceName.Equals(""))
+        {
+            CaptureSpecificWindow();
+            if (capturedImage != null)
+            {
+                return capturedImage;
+            }
+            Console.WriteLine("Unable to capture image... using main display");
+        }
+        return CaptureWindow(User32.GetDesktopWindow());
+    }
+}
