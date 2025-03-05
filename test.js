@@ -67,4 +67,12 @@ test('screenshot each display', t => {
       console.error('Error taking screenshot:', err);
     });
   }); 
+
+test('parse display output', t => {
+    if (screenshot.EXAMPLE_DISPLAYS_OUTPUT && screenshot.parseDisplaysOutput) {
+      const disps = screenshot.parseDisplaysOutput(screenshot.EXAMPLE_DISPLAYS_OUTPUT);
+      checkDisplays(t, disps);
+    }
+  });
+  
   
