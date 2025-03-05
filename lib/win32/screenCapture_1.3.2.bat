@@ -63,4 +63,20 @@ public class ScreenCapture
         }
         return CaptureWindow(User32.GetDesktopWindow());
     }
+
+
+/// Creates an Image object containing a screen shot of a specific window
+
+    private Image CaptureWindow(IntPtr handle)
+    {
+        // get te hDC of the target window
+        IntPtr hdcSrc = User32.GetWindowDC(handle);
+        // get the size
+        User32.RECT windowRect = new User32.RECT();
+        User32.GetWindowRect(handle, ref windowRect);
+
+        Image img = CaptureWindowFromDC(handle, hdcSrc, windowRect);
+        User32.ReleaseDC(handle, hdcSrc);
+        return img;
+    }
 }
